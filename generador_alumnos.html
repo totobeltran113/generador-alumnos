@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generador de Alumnos</title>
+  <style>
+    :root {
+      --bg: #f5f7ff;
+      --card: #ffffff;
+      --primary: #3b82f6;
+      --primary-dark: #1d4ed8;
+      --accent: #10b981;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #dbe3f0;
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #eef4ff, #f8fafc);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.08);
+      padding: 28px;
+    }
+
+    h1 {
+      margin-top: 0;
+      color: var(--primary-dark);
+      font-size: 2rem;
+      text-align: center;
+    }
+
+    .controls {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      margin: 24px 0;
+    }
+
+    label {
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    input[type="number"] {
+      width: 170px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 1rem;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .primary-btn {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .primary-btn:hover {
+      background: var(--primary-dark);
+    }
+
+    .download-btn {
+      background: var(--accent);
+      color: white;
+      margin-right: 10px;
+      margin-top: 8px;
+    }
+
+    .download-btn:hover {
+      filter: brightness(0.96);
+    }
+
+    .status {
+      margin: 18px 0 0;
+      text-align: center;
+      color: var(--muted);
+      font-weight: 600;
+      min-height: 22px;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      visibility: hidden;
+      margin-top: 16px;
+    }
+
+    .actions.visible {
+      visibility: visible;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 24px;
+      overflow: hidden;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      font-size: 0.94rem;
+    }
+
+    th {
+      background: #f1f5f9;
+      color: var(--text);
+    }
+
+    tbody tr:nth-child(even) {
+      background: #fafcff;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 20px;
+      font-style: italic;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 16px;
+      }
+
+      .card {
+        padding: 18px 14px;
+      }
+
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      input[type="number"] {
+        width: 100%;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>Generador de Alumnos</h1>
+
+      <div class="controls">
+        <label for="cantidad">¿Cuántos alumnos deseas generar?</label>
+        <input id="cantidad" type="number" min="1" value="10" />
+        <button id="generarBtn" class="primary-btn">Generar</button>
+      </div>
+
+      <div id="status" class="status"></div>
+
+      <div id="acciones" class="actions">
+        <button class="download-btn" data-type="csv">Descargar CSV</button>
+        <button class="download-btn" data-type="json">Descargar JSON</button>
+        <button class="download-btn" data-type="sql">Descargar SQL</button>
+      </div>
+
+      <div id="tablaContainer"></div>
+    </div>
+  </div>
+
+  <script>
+    const apellidos_1 = [
+      "Garcia", "Martinez", "Lopez", "Gonzalez", "Perez", "Rodriguez", "Sanchez", "Ramirez", "Cruz", "Gomez",
+      "Flores", "Morales", "Vazquez", "Jimenez", "Reyes", "Diaz", "Torres", "Gutierrez", "Ruiz", "Hernandez",
+      "Alvarez", "Castillo", "Romero", "Mendoza", "Juarez", "Moreno", "Ortiz", "Rubio", "Marin", "Iglesias",
+      "Sanz", "Castano", "Medina", "Vargas", "Castro", "Guzman", "Fernandez", "Munoz", "Santos", "Blanco",
+      "Navarro", "Dominguez", "Gil", "Serrano", "Ramos", "Soto", "Contreras", "Luna", "Cabrera", "Rojas",
+      "Campos", "Vega", "Fuentes", "Carrillo", "Cervantes", "Sandoval", "Pacheco", "Ponce", "Mejia", "Mendez",
+      "Lara", "Nunez", "Salazar", "Acosta", "Bermudez", "Padilla", "Esquivel", "Gallegos", "Rios", "Mora",
+      "Ibarra", "Tellez", "Valenzuela", "Sarabia", "Luevanos", "Espinoza", "Duarte", "Palacios", "Peralta",
+      "Quezada", "Resendiz", "Salgado", "Tapia", "Uribe", "Valdez", "Zavala", "Alanis", "Banda", "Cardenas",
+      "Delgado", "Estrada", "Fierro", "Galvan", "Hurtado", "Jaime", "Limon", "Macias", "Noriega", "Ochoa",
+      "Palomares", "Quintero", "Rangel", "Saavedra", "Tijerina", "Urias", "Velazquez", "Zazueta", "Acuna"
+    ];
+
+    const apellidos_2 = [...apellidos_1];
+    const nombres = [
+      "Alejandro", "Sofia", "Carlos", "Valeria", "Daniel", "Mariana", "Jose", "Fernanda", "Luis", "Andrea",
+      "David", "Lucia", "Miguel", "Camila", "Jorge", "Paola"
+    ];
+
+    let ultimoResultado = [];
+    let ultimoCsv = "";
+    let ultimoJson = "";
+    let ultimoSql = "";
+
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function generarAlumno(index) {
+      const matricula = String(10000000 + index);
+      const primerApellido = apellidos_1[randomInt(0, apellidos_1.length - 1)];
+      const segundoApellido = Math.random() < 0.10 ? "" : apellidos_2[randomInt(0, apellidos_2.length - 1)];
+      const nombre = nombres[randomInt(0, nombres.length - 1)];
+
+      const startDate = new Date(1995, 0, 1);
+      const endDate = new Date(2005, 11, 31);
+      const rangeDays = (endDate - startDate) / (1000 * 60 * 60 * 24);
+      const randomDays = randomInt(0, Math.floor(rangeDays));
+      const fechaNacimiento = new Date(startDate);
+      fechaNacimiento.setDate(fechaNacimiento.getDate() + randomDays);
+
+      const fechaFormateada = fechaNacimiento.toISOString().slice(0, 10);
+      const correo = `${matricula}@unikino.edu.mx`;
+
+      return {
+        matricula,
+        primer_apellido: primerApellido,
+        segundo_apellido: segundoApellido,
+        nombre,
+        fecha_nacimiento: fechaFormateada,
+        correo
+      };
+    }
+
+    function generarCsv(alumnos) {
+      const headers = [
+        "matricula",
+        "primer_apellido",
+        "segundo_apellido",
+        "nombre",
+        "fecha_nacimiento",
+        "correo"
+      ];
+
+      const rows = alumnos.map((a) => [
+        a.matricula,
+        a.primer_apellido,
+        a.segundo_apellido,
+        a.nombre,
+        a.fecha_nacimiento,
+        a.correo
+      ]);
+
+      return [headers, ...rows]
+        .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+        .join("\n");
+    }
+
+    function generarSql(alumnos) {
+      const lines = ["INSERT INTO alumnos (matricula, primer_apellido, segundo_apellido, nombre, fecha_nacimiento, correo) VALUES"];
+
+      alumnos.forEach((a, index) => {
+        const segundoApellido = a.segundo_apellido ? `'${a.segundo_apellido}'` : "NULL";
+        const line = `('${a.matricula}', '${a.primer_apellido}', ${segundoApellido}, '${a.nombre}', '${a.fecha_nacimiento}', '${a.correo}')${index === alumnos.length - 1 ? ';' : ','}`;
+        lines.push(line);
+      });
+
+      return lines.join("\n");
+    }
+
+    function generarTabla(alumnos) {
+      const container = document.getElementById("tablaContainer");
+
+      if (!alumnos.length) {
+        container.innerHTML = '<div class="empty">No hay alumnos generados aún.</div>';
+        return;
+      }
+
+      const table = `
+        <table>
+          <thead>
+            <tr>
+              <th>Matrícula</th>
+              <th>Primer apellido</th>
+              <th>Segundo apellido</th>
+              <th>Nombre</th>
+              <th>Fecha nacimiento</th>
+              <th>Correo</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${alumnos.map((a) => `
+              <tr>
+                <td>${a.matricula}</td>
+                <td>${a.primer_apellido}</td>
+                <td>${a.segundo_apellido || "-"}</td>
+                <td>${a.nombre}</td>
+                <td>${a.fecha_nacimiento}</td>
+                <td>${a.correo}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+
+      container.innerHTML = table;
+    }
+
+    function descargarArchivo(nombreArchivo, contenido, tipo) {
+      const blob = new Blob([contenido], { type: tipo });
+      const url = URL.createObjectURL(blob);
+      const enlace = document.createElement("a");
+      enlace.href = url;
+      enlace.download = nombreArchivo;
+      document.body.appendChild(enlace);
+      enlace.click();
+      enlace.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function generarTodo() {
+      const cantidadInput = document.getElementById("cantidad");
+      const cantidad = Number(cantidadInput.value);
+
+      if (!Number.isInteger(cantidad) || cantidad < 1) {
+        document.getElementById("status").textContent = "Ingresa una cantidad válida mayor a 0.";
+        return;
+      }
+
+      const alumnos = [];
+      for (let i = 1; i <= cantidad; i++) {
+        alumnos.push(generarAlumno(i));
+      }
+
+      ultimoResultado = alumnos;
+      ultimoCsv = generarCsv(alumnos);
+      ultimoJson = JSON.stringify(alumnos, null, 4);
+      ultimoSql = generarSql(alumnos);
+
+      document.getElementById("status").textContent = `¡Se generaron exitosamente ${cantidad} alumnos!`;
+      document.getElementById("acciones").classList.add("visible");
+
+      generarTabla(alumnos);
+    }
+
+    document.getElementById("generarBtn").addEventListener("click", generarTodo);
+
+    document.querySelectorAll(".download-btn").forEach((boton) => {
+      boton.addEventListener("click", () => {
+        const tipo = boton.dataset.type;
+
+        if (!ultimoResultado.length) {
+          document.getElementById("status").textContent = "Primero genera una lista de alumnos.";
+          return;
+        }
+
+        if (tipo === "csv") {
+          descargarArchivo("alumnos.csv", ultimoCsv, "text/csv;charset=utf-8");
+        } else if (tipo === "json") {
+          descargarArchivo("alumnos.json", ultimoJson, "application/json;charset=utf-8");
+        } else if (tipo === "sql") {
+          descargarArchivo("alumnos.sql", ultimoSql, "application/sql;charset=utf-8");
+        }
+      });
+    });
+  </script>
+</body>
+</html>
